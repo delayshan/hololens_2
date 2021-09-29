@@ -196,7 +196,7 @@ public class Posture_Compute_Mgr : MonoBehaviour
         List<GameObject> childWithTag = new List<GameObject>();
         for (int children = 0; children < gameObject.transform.childCount; children++)
         {
-            Debug.LogWarning(gameObject.name);
+            //Debug.LogWarning(gameObject.name);
             //Debug.LogWarning(gameObject.transform.childCount);
             //Debug.LogWarning(gameObject.transform.GetChild(children).gameObject.name);
             if (gameObject.transform.GetChild(children).tag == tagname)

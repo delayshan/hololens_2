@@ -86,12 +86,15 @@ public class User_posture : MonoBehaviour
         {
             counter += 1;
         }
-        vector3RightForeArm.y += (float)0.005 * double_num;
-        vector3RightArm.y += (float)0.001 * double_num;
+        //vector3RightForeArm.y += (float)0.005 * double_num;
+        //vector3RightArm.y += (float)0.001 * double_num;
 
         //第二關節目標位置-第一關節現在位置得出 第一關節在第二關節就定位時應該要有的ROTATION
-        //使腹部與胸部相接
-        this.ComputeAbdomenRotation();
+        //使腹部與胸部相接(腹部比較特殊 無法單純用上下位置判定 看之後智慧衣是否會提供角向量)
+
+        //this.ComputeAbdomenRotation();
+        //transformChest.position = vector3Chest;
+        transformAbdomen.position = vector3abdomen;
 
         //使胸部與右手相接
         this.ComputeChestRotation();
@@ -136,7 +139,7 @@ public class User_posture : MonoBehaviour
     private void LateUpdate()
     {
         //更改POSITION(位置要比ROTATION慢更改 因為身體有父子關係)
-        transformAbdomen.position = vector3abdomen;
+        
 
 
 

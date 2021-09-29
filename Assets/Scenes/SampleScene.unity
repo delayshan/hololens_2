@@ -3955,9 +3955,12 @@ MonoBehaviour:
   transformRightLeg: {fileID: 716198065}
   transformLeftUpLeg: {fileID: 6204588}
   transformLeftLeg: {fileID: 1969759867}
+  floatBigDifferent: 0.05
+  floatSmallDifferent: 0.03
   floatCameraTimer: 5
   booleanCameraCheck: 0
   intBodyPartNum: -1
+  intSmallDifBodyPartNum: -1
 --- !u!20 &1295294062
 Camera:
   m_ObjectHideFlags: 0
