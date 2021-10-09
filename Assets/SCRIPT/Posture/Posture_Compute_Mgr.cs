@@ -225,6 +225,10 @@ public class Posture_Compute_Mgr : MonoBehaviour
     {
         return UPUserPosture.GetRightForeArmPostion().position - UPCoachPosture.GetRightForeArmPostion().position;
     }
+    public Vector3 GetRightHandDistance()
+    {
+        return UPUserPosture.GetRightHandPostion().position - UPCoachPosture.GetRightHandPostion().position;
+    }
     public Vector3 GetLeftArmDistance()
     {
         return UPUserPosture.GetLeftArmPostion().position - UPCoachPosture.GetLeftArmPostion().position;
@@ -232,6 +236,10 @@ public class Posture_Compute_Mgr : MonoBehaviour
     public Vector3 GetLeftForeArmDistance()
     {
         return UPUserPosture.GetLeftForeArmPostion().position - UPCoachPosture.GetLeftForeArmPostion().position;
+    }
+    public Vector3 GetLeftHandDistance()
+    {
+        return UPUserPosture.GetLeftHandPostion().position - UPCoachPosture.GetLeftHandPostion().position;
     }
     public Vector3 GetRightUpLegDistance()
     {
@@ -241,6 +249,10 @@ public class Posture_Compute_Mgr : MonoBehaviour
     {
         return UPUserPosture.GetRightLegPostion().position - UPCoachPosture.GetRightLegPostion().position;
     }
+    public Vector3 GetRightFootDistance()
+    {
+        return UPUserPosture.GetRightFootPostion().position - UPCoachPosture.GetRightFootPostion().position;
+    }
     public Vector3 GetLeftUpLegDistance()
     {
         return UPUserPosture.GetLeftUpLegPostion().position - UPCoachPosture.GetLeftUpLegPostion().position;
@@ -248,6 +260,10 @@ public class Posture_Compute_Mgr : MonoBehaviour
     public Vector3 GetLeftLegDistance()
     {
         return UPUserPosture.GetLeftLegPostion().position - UPCoachPosture.GetLeftLegPostion().position;
+    }
+    public Vector3 GetLeftFootDistance()
+    {
+        return UPUserPosture.GetLeftFootPostion().position - UPCoachPosture.GetLeftFootPostion().position;
     }
     /////////////////////////計算使用者各個關節與教練關節差距/////////////////////////////////////
     ///////////////////////////////////改變模型顏色///////////////////////////////////////////////

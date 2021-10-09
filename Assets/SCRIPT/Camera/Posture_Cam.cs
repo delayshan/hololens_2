@@ -17,11 +17,17 @@ public class Posture_Cam : MonoBehaviour
     [Header("右手前臂")]
     private Transform transformRightForeArm = null;
     [SerializeField]
+    [Header("右手掌")]
+    private Transform transformRightHand = null;
+    [SerializeField]
     [Header("左手")]
     private Transform transformLeftArm = null;
     [SerializeField]
     [Header("左手前臂")]
     private Transform transformLeftForeArm = null;
+    [SerializeField]
+    [Header("左手掌")]
+    private Transform transformLeftHand = null;
     [SerializeField]
     [Header("右大腿")]
     private Transform transformRightUpLeg = null;
@@ -29,11 +35,17 @@ public class Posture_Cam : MonoBehaviour
     [Header("右小腿")]
     private Transform transformRightLeg = null;
     [SerializeField]
+    [Header("右腳踝")]
+    private Transform transformRightFoot = null;
+    [SerializeField]
     [Header("左大腿")]
     private Transform transformLeftUpLeg = null;
     [SerializeField]
     [Header("左小腿")]
     private Transform transformLeftLeg = null;
+    [SerializeField]
+    [Header("左腳踝")]
+    private Transform transformLeftFoot = null;
 
     /// <summary>
     /// 使用者關節與教練機的位置差距以多少為基準為差距大(標為紅色)
@@ -60,14 +72,14 @@ public class Posture_Cam : MonoBehaviour
     private bool booleanCameraCheck=false;
     /// <summary>
     /// 目前相機在以誰為主移動
-    /// -1:無 0:腹部 1:胸部 2:右手 3:右手前臂 4:左手 5:左手前臂 6:右大腿 7:右小腿 8:左大腿 9:左小腿
+    /// -1:無 0:腹部 1:胸部 2:右手臂 3:右手前臂 4.右手掌 5:左手臂 6:左手前臂 7:左手掌 8:右大腿 9:右小腿 10:右腳踝 11:左大腿 12:左小腿 13:左腳踝
     /// </summary>
     [SerializeField]
     private int intBodyPartNum = -1;
 
     /// <summary>
     /// 差距極小的身體部位 控制相機看著但不移動
-    /// -1:無 0:腹部 1:胸部 2:右手 3:右手前臂 4:左手 5:左手前臂 6:右大腿 7:右小腿 8:左大腿 9:左小腿
+    /// -1:無 0:腹部 1:胸部 2:右手臂 3:右手前臂 4.右手掌 5:左手臂 6:左手前臂 7:左手掌 8:右大腿 9:右小腿 10:右腳踝 11:左大腿 12:左小腿 13:左腳踝
     /// </summary>
     [SerializeField]
     private int intSmallDifBodyPartNum = -1;
@@ -111,7 +123,9 @@ public class Posture_Cam : MonoBehaviour
             else booleanCameraCheck = false;
 
         }
-        //booleanCameraCheck為FALSE 代表前面已有判斷過肢體差距或尚未進行判斷 因此以判斷過的數字進行動作
+        //booleanCameraCheck為FALSE 代表前面已有判斷過肢體差距或從未進行判斷 因此以判斷過的數字進行動作
+        //當有過大差距時intBodyPartNum會有數字 若有則相機會移動且看著該部位
+        //intBodyPartNum沒數字時會接著判斷intSmallDifBodyPartNum是否有數字 代表有些微差距的部分 
         else if (booleanCameraCheck == false)
         {
             if (intBodyPartNum == 0)
@@ -132,27 +146,43 @@ public class Posture_Cam : MonoBehaviour
             }
             else if (intBodyPartNum == 4)
             {
-                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftArmDistance(), transformLeftArm);
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightHandDistance(), transformRightHand);
             }
             else if (intBodyPartNum == 5)
+            {
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftArmDistance(), transformLeftArm);
+            }
+            else if (intBodyPartNum == 6)
             {           
                 CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftForeArmDistance(), transformLeftForeArm);
             }
-            else if (intBodyPartNum == 6)
-            {
-                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightUpLegDistance(), transformRightUpLeg);
-            }
             else if (intBodyPartNum == 7)
             {
-                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightLegDistance(), transformRightLeg);
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftHandDistance(), transformLeftHand);
             }
             else if (intBodyPartNum == 8)
             {
-                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance(), transformLeftUpLeg);
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightUpLegDistance(), transformRightUpLeg);
             }
             else if (intBodyPartNum == 9)
             {
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightLegDistance(), transformRightLeg);
+            }
+            else if (intBodyPartNum == 10)
+            {
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightFootDistance(), transformRightFoot);
+            }
+            else if (intBodyPartNum == 11)
+            {
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance(), transformLeftUpLeg);
+            }
+            else if (intBodyPartNum == 12)
+            {
                 CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftLegDistance(), transformLeftLeg);
+            }
+            else if (intBodyPartNum == 13)
+            {
+                CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftFootDistance(), transformLeftFoot);
             }
             else
             {
@@ -182,27 +212,43 @@ public class Posture_Cam : MonoBehaviour
                 }
                 else if (intSmallDifBodyPartNum == 4)
                 {
-                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftArmDistance(), transformLeftArm);
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightHandDistance(), transformRightHand);
                 }
                 else if (intSmallDifBodyPartNum == 5)
                 {
-                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftForeArmDistance(), transformLeftForeArm);
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftArmDistance(), transformLeftArm);
                 }
                 else if (intSmallDifBodyPartNum == 6)
                 {
-                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightUpLegDistance(), transformRightUpLeg);
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftForeArmDistance(), transformLeftForeArm);
                 }
                 else if (intSmallDifBodyPartNum == 7)
                 {
-                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightLegDistance(), transformRightLeg);
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftHandDistance(), transformLeftHand);
                 }
                 else if (intSmallDifBodyPartNum == 8)
                 {
-                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance(), transformLeftUpLeg);
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightUpLegDistance(), transformRightUpLeg);
                 }
                 else if (intSmallDifBodyPartNum == 9)
                 {
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightLegDistance(), transformRightLeg);
+                }
+                else if (intSmallDifBodyPartNum == 10)
+                {
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetRightFootDistance(), transformRightFoot);
+                }
+                else if (intSmallDifBodyPartNum == 11)
+                {
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance(), transformLeftUpLeg);
+                }
+                else if (intSmallDifBodyPartNum == 12)
+                {
                     CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftLegDistance(), transformLeftLeg);
+                }
+                else if (intSmallDifBodyPartNum == 13)
+                {
+                    CameraLookAtBodyPart(Posture_Compute_Mgr.Instance.GetLeftFootDistance(), transformLeftFoot);
                 }
                 else
                 {
@@ -293,11 +339,11 @@ public class Posture_Cam : MonoBehaviour
     }
 
     /// <summary>
-    /// 判斷是哪個關節位置不正確(只取一個)
+    /// 判斷是哪個關節位置不正確(只取一個) 找到的關節會更改intBodyPartNum及intSmallDifBodyPartNum的值
     /// </summary>
     private void CompareBodyPart()
     {
-        //先判斷是否有嚴重偏差(紅色) 沒有才會去判斷輕微偏差(黃色)
+        //判斷是否有嚴重偏差(紅色)與輕微偏差(黃色)
         if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetAbdomenDistance())==1)
         {
             intBodyPartNum = 0;
@@ -314,29 +360,45 @@ public class Posture_Cam : MonoBehaviour
         {
             intBodyPartNum = 3;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftArmDistance()) == 1)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightHandDistance()) == 1)
         {
             intBodyPartNum = 4;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftForeArmDistance()) == 1)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftArmDistance()) == 1)
         {
             intBodyPartNum = 5;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightUpLegDistance()) == 1)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftForeArmDistance()) == 1)
         {
             intBodyPartNum = 6;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightLegDistance()) == 1)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftHandDistance()) == 1)
         {
             intBodyPartNum = 7;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance()) == 1)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightUpLegDistance()) == 1)
         {
             intBodyPartNum = 8;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftLegDistance()) == 1)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightLegDistance()) == 1)
         {
             intBodyPartNum = 9;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightFootDistance()) == 1)
+        {
+            intBodyPartNum = 10;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance()) == 1)
+        {
+            intBodyPartNum = 11;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftLegDistance()) == 1)
+        {
+            intBodyPartNum = 12;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftFootDistance()) == 1)
+        {
+            intBodyPartNum = 13;
         }
         else
         {
@@ -361,29 +423,45 @@ public class Posture_Cam : MonoBehaviour
         {
             intSmallDifBodyPartNum = 3;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftArmDistance()) == 0)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightHandDistance()) == 0)
         {
             intSmallDifBodyPartNum = 4;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftForeArmDistance()) == 0)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftArmDistance()) == 0)
         {
             intSmallDifBodyPartNum = 5;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightUpLegDistance()) == 0)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftForeArmDistance()) == 0)
         {
             intSmallDifBodyPartNum = 6;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightLegDistance()) == 0)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftHandDistance()) == 0)
         {
             intSmallDifBodyPartNum = 7;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance()) == 0)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightUpLegDistance()) == 0)
         {
             intSmallDifBodyPartNum = 8;
         }
-        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftLegDistance()) == 0)
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightLegDistance()) == 0)
         {
             intSmallDifBodyPartNum = 9;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightFootDistance()) == 0)
+        {
+            intSmallDifBodyPartNum = 10;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance()) == 0)
+        {
+            intSmallDifBodyPartNum = 11;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftLegDistance()) == 0)
+        {
+            intSmallDifBodyPartNum = 12;
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftFootDistance()) == 0)
+        {
+            intSmallDifBodyPartNum = 13;
         }
         else
         {
@@ -508,6 +586,32 @@ public class Posture_Cam : MonoBehaviour
             }
         }
 
+        if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightHandDistance()) == 1)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformRightHand.gameObject, "BodyPart").ToArray();
+
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToRed(temp[j].transform);
+            }
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightHandDistance()) == 0)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformRightHand.gameObject, "BodyPart").ToArray();
+            //Debug.LogError(transformAbdomen.gameObject);
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToYellow(temp[j].transform);
+            }
+        }
+        else
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformRightHand.gameObject, "BodyPart").ToArray();
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToGreen(temp[j].transform);
+            }
+        }
 
         if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftArmDistance()) == 1)
         {
@@ -559,6 +663,33 @@ public class Posture_Cam : MonoBehaviour
         else
         {
             GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformLeftForeArm.gameObject, "BodyPart").ToArray();
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToGreen(temp[j].transform);
+            }
+        }
+
+        if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftHandDistance()) == 1)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformLeftHand.gameObject, "BodyPart").ToArray();
+
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToRed(temp[j].transform);
+            }
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftHandDistance()) == 0)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformLeftHand.gameObject, "BodyPart").ToArray();
+            //Debug.LogError(transformAbdomen.gameObject);
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToYellow(temp[j].transform);
+            }
+        }
+        else
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformLeftHand.gameObject, "BodyPart").ToArray();
             for (int j = 0; j < temp.Length; j++)
             {
                 Posture_Compute_Mgr.Instance.ChangeBodyPartToGreen(temp[j].transform);
@@ -621,6 +752,32 @@ public class Posture_Cam : MonoBehaviour
             }
         }
 
+        if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightFootDistance()) == 1)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformRightFoot.gameObject, "BodyPart").ToArray();
+
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToRed(temp[j].transform);
+            }
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetRightFootDistance()) == 0)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformRightFoot.gameObject, "BodyPart").ToArray();
+            //Debug.LogError(transformAbdomen.gameObject);
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToYellow(temp[j].transform);
+            }
+        }
+        else
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformRightFoot.gameObject, "BodyPart").ToArray();
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToGreen(temp[j].transform);
+            }
+        }
 
         if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftUpLegDistance()) == 1)
         {
@@ -677,5 +834,31 @@ public class Posture_Cam : MonoBehaviour
             }
         }
 
+        if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftFootDistance()) == 1)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformLeftFoot.gameObject, "BodyPart").ToArray();
+
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToRed(temp[j].transform);
+            }
+        }
+        else if (CheckVector3Distance(Posture_Compute_Mgr.Instance.GetLeftFootDistance()) == 0)
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformLeftFoot.gameObject, "BodyPart").ToArray();
+            //Debug.LogError(transformAbdomen.gameObject);
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToYellow(temp[j].transform);
+            }
+        }
+        else
+        {
+            GameObject[] temp = Posture_Compute_Mgr.Instance.FindGameObjectInChildLayerWithTag(transformLeftFoot.gameObject, "BodyPart").ToArray();
+            for (int j = 0; j < temp.Length; j++)
+            {
+                Posture_Compute_Mgr.Instance.ChangeBodyPartToGreen(temp[j].transform);
+            }
+        }
     }
 }
