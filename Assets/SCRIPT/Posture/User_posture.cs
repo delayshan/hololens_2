@@ -67,7 +67,8 @@ public class User_posture : MonoBehaviour
     [SerializeField]
     private Vector3 vector3LeftFoot;
 
-
+    private Transform transformLeftChesttoShoulderBone = null;
+    private Transform transformRightChesttoShoulderBone = null;
 
 
     int counter = 0, double_num = 1;
@@ -80,6 +81,14 @@ public class User_posture : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (vector3Chest!=null)
+        {
+            transformLeftChesttoShoulderBone = transformChest.transform.Find("LeftShoulder_Cube");
+            transformRightChesttoShoulderBone = transformChest.transform.Find("RightShoulder_Cube");
+
+        }
+        
+        
         /*
         Vector3 TempForeArm = transformRightForeArm.position;
         Vector3 RightArmDirection = transformRightForeArm.position - transformRightArm.position;
@@ -114,6 +123,10 @@ public class User_posture : MonoBehaviour
         //使胸部與右手相接
         transformChest.position = vector3Chest;
         this.ComputeChestRotation();
+
+        //使胸口骨骼與兩手臂的位置相接
+        this.ComputeRightShoulderBoneRotation();
+        this.ComputeLeftShoulderBoneRotation();
 
         //使右手臂朝向右前臂
         transformRightArm.position = vector3RightArm;
@@ -198,12 +211,33 @@ public class User_posture : MonoBehaviour
     /// </summary>
     private void ComputeChestRotation()
     {
-        //因為胸可會被腹部旋轉所更動ROTATION(當然其他的部位也會) 但由於胸部的ROTATION計算是由transformChestTarget的位置進行 且該位置不在胸部原點
+        //因為胸口會被腹部旋轉所更動ROTATION(當然其他的部位也會) 但由於胸部的ROTATION計算是由transformChestTarget的位置進行 且該位置不在胸部原點
         //因此在每次計算時 要將胸部ROTATION歸回初始
         transformChest.right = new Vector3(1, 0, 0);
         Vector3 ChestDirection = vector3RightArm - transformChestTarget.position;
         Vector3 ChestNewDirection = Vector3.RotateTowards(transformChest.transform.right, ChestDirection, 360, 0.0f);
         transformChest.right = ChestNewDirection;
+    }
+    /// <summary>
+    /// 計算右手胸口骨骼與"右手肩膀"間的ROTATION
+    /// </summary>
+    private void ComputeRightShoulderBoneRotation()
+    {
+
+        Vector3 RightShoulderBoneDirection = vector3RightArm - transformChest.position;
+        Vector3 RightShoulderBoneNewDirection = Vector3.RotateTowards(transformRightChesttoShoulderBone.transform.right, RightShoulderBoneDirection, 180, 0.0f);
+        transformRightChesttoShoulderBone.right = RightShoulderBoneNewDirection;
+        transformRightChesttoShoulderBone.position = transformChest.position + RightShoulderBoneDirection / 2f;
+    }
+    /// <summary>
+    /// 計算左手胸口骨骼與"右手臂"間的ROTATION
+    /// </summary>
+    private void ComputeLeftShoulderBoneRotation()
+    {
+        Vector3 LeftShoulderBoneirection = vector3LeftArm - transformChest.position;
+        Vector3 LeftShoulderBoneNewDirection = Vector3.RotateTowards(transformLeftChesttoShoulderBone.transform.right * -1, LeftShoulderBoneirection, 180, 0.0f);
+        transformLeftChesttoShoulderBone.right = LeftShoulderBoneNewDirection * -1;
+        transformLeftChesttoShoulderBone.position = transformChest.position + LeftShoulderBoneirection / 2f;
     }
     /// <summary>
     /// 計算右手臂與"右前臂"間的ROTATION
@@ -338,6 +372,68 @@ public class User_posture : MonoBehaviour
     }
 
     /////////////////////////傳遞各個關節位置/////////////////////////////////////
+
+    /////////////////////////輸入各個關節位置/////////////////////////////////////
+    public void SetAbdomenPostion(Vector3 position)
+    {
+        vector3abdomen = position;
+    }
+    public void SetChestPostion(Vector3 position)
+    {
+        vector3Chest = position;
+    }
+    public void SetRightArmPostion(Vector3 position)
+    {
+        vector3RightArm = position;
+    }
+    public void SetRightForeArmPostion(Vector3 position)
+    {
+        vector3RightForeArm = position;
+    }
+    public void SetRightHandPostion(Vector3 position)
+    {
+        vector3RightHand = position;
+    }
+    public void SetLeftArmPostion(Vector3 position)
+    {
+        vector3LeftArm = position;
+    }
+    public void SetLeftForeArmPostion(Vector3 position)
+    {
+        vector3LeftForeArm = position;
+    }
+    public void SetLeftHandPostion(Vector3 position)
+    {
+        vector3LeftHand = position;
+    }
+    public void SetRightUpLegPostion(Vector3 position)
+    {
+        vector3RightUpLeg = position;
+    }
+    public void SetRightLegPostion(Vector3 position)
+    {
+        vector3RightLeg = position;
+    }
+    public void SetRightFootPostion(Vector3 position)
+    {
+        vector3RightFoot = position;
+    }
+    public void SetLeftUpLegPostion(Vector3 position)
+    {
+        vector3LeftUpLeg = position;
+    }
+    public void SetLeftLegPostion(Vector3 position)
+    {
+        vector3LeftLeg = position;
+    }
+    public void SetLeftFootPostion(Vector3 position)
+    {
+        vector3LeftFoot = position;
+    }
+
+
+    /////////////////////////輸入各個關節位置/////////////////////////////////////
+
 
 
 }
