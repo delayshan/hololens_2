@@ -546,7 +546,7 @@ Transform:
   m_GameObject: {fileID: 217179403}
   m_LocalRotation: {x: -0.000000009732223, y: -0.00000000973222, z: 0.7071071, w: 0.70710653}
   m_LocalPosition: {x: -0, y: 0.1765, z: -0}
-  m_LocalScale: {x: 0.28, y: 0.050000004, z: 0.05}
+  m_LocalScale: {x: 0.5, y: 0.050000004, z: 0.05}
   m_Children: []
   m_Father: {fileID: 475879632}
   m_RootOrder: 3
@@ -1975,6 +1975,7 @@ MonoBehaviour:
   savePath: C:/Users/Ethan_lab/Documents/GitHub/MRProject/Assets/FBX/m_fbx.fbx
   prefab: {fileID: 0}
   m_UserPosture: {fileID: 1022760009}
+  m_CoachPosture: {fileID: 789846101}
 --- !u!4 &697490402 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: c82ca3a377235474f96d7e64c6545155,
@@ -2654,7 +2655,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 955673012}
   m_LocalRotation: {x: 4.2351647e-22, y: 4.2632574e-14, z: 2.2737368e-13, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0415}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.12, y: 0.12, z: 0.12}
   m_Children: []
   m_Father: {fileID: 111452822}
@@ -4097,7 +4098,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1272836103}
   m_LocalRotation: {x: 6.352747e-22, y: 4.2632574e-14, z: 2.2737368e-13, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0.041499883}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 0.12, y: 0.12, z: 0.12}
   m_Children: []
   m_Father: {fileID: 1627965964}
@@ -5480,8 +5481,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1613542083}
   m_LocalRotation: {x: -0.000000009732223, y: -0.0000000097322195, z: 0.7071071, w: 0.70710653}
-  m_LocalPosition: {x: -0, y: 0.17650002, z: 0}
-  m_LocalScale: {x: 0.28, y: 0.05, z: 0.049999997}
+  m_LocalPosition: {x: -0, y: 0.273, z: -0}
+  m_LocalScale: {x: 0.5, y: 0.05, z: 0.049999997}
   m_Children: []
   m_Father: {fileID: 1065505812}
   m_RootOrder: 3
@@ -5561,17 +5562,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: c82ca3a377235474f96d7e64c6545155,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c82ca3a377235474f96d7e64c6545155,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c82ca3a377235474f96d7e64c6545155,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c82ca3a377235474f96d7e64c6545155,
         type: 3}

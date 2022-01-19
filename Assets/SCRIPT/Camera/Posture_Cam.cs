@@ -98,6 +98,13 @@ public class Posture_Cam : MonoBehaviour
     private void Update()
     {
         CompareBodyPartsAndDrawColor();
+
+
+        /**因骨架資料為SCALE乘200才正常顯示 因此先暫時調整相機位置**/
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            this.SetCam();
+        }
     }
 
     void LateUpdate()
@@ -861,4 +868,13 @@ public class Posture_Cam : MonoBehaviour
             }
         }
     }
+
+
+
+    /**因骨架資料為SCALE乘200才正常顯示 因此先暫時調整相機位置**/
+    public void SetCam()
+    {
+        this.transform.position =new Vector3(transformAbdomen.position.x, transformAbdomen.position.y, transformAbdomen.position.z-100) ;
+    }
+
 }
