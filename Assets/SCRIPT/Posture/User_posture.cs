@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class User_posture : MonoBehaviour
 {
+    /// <summary>
+    /// 使用向量來更改關節位置
+    /// </summary>
+    [SerializeField]
+    private bool boolChangeToVectorMode = true;
+
 
     [SerializeField] [Header("腹部")]
     private Transform transformAbdomen = null;
@@ -71,7 +77,6 @@ public class User_posture : MonoBehaviour
     private Transform transformRightChesttoShoulderBone = null;
 
 
-    int counter = 0, double_num = 1;
 
 
     /*****************取出資料中的關節部位資訊*************************/
@@ -151,6 +156,7 @@ public class User_posture : MonoBehaviour
             clock = 0;
         }
 
+        //將得到的資料輸入進身體資訊 同時進行平滑化(沒更改位置但給值)
         if (FloatArray != null)
         {
             //10貞+1 CHECK(資料行數) 每2個(以X為準)CHECK進行一次位置處理
@@ -405,72 +411,118 @@ public class User_posture : MonoBehaviour
 
 
 
-
-
-
-
-        //右手位置變化
-        if (counter >= 60)
+        //計算給定位置間的向量改變人體位置
+        if (boolChangeToVectorMode)
         {
-            double_num *= -1;
-            counter = -60;
+
+            
+            Vector3 AbdomenDirection = vector3Chest - vector3abdomen;
+            //Vector3 AbdomenNewDirection = Vector3.RotateTowards(transformAbdomen.transform.up,new Vector3(AbdomenDirection.x, AbdomenDirection.y, AbdomenDirection.z) , 360, 0.0f);
+            //transformAbdomen.up = AbdomenDirection;
+            
+            transformAbdomen.rotation = Quaternion.LookRotation(new Vector3(0, 0, 1), AbdomenDirection);
+
+            //Debug.Log(Vector3.Cross(new Vector3(0, 0, 1),new Vector3(1, 0, 0)));
+
+            //因為用向量計算無法得到CHEST TARGET 所以目前先用CHEST
+            //transformChest.right = new Vector3(1, 0, 0);
+            
+
+
+            Vector3 ChestDirection = vector3RightArm - vector3Chest;
+            //Vector3 ChestNewDirection = Vector3.RotateTowards(transformChest.transform.right,new Vector3(ChestDirection.x, ChestDirection.y-10, ChestDirection.z), 360, 0.0f);
+            //Vector3.Cross(AbdomenDirection, ChestDirection);
+            transformChest.rotation = Quaternion.LookRotation(Vector3.Cross(ChestDirection , AbdomenDirection), AbdomenDirection);
+            
+            Vector3 RightArmDirection = vector3RightForeArm - vector3RightArm;
+            //Vector3 RightArmNewDirection = Vector3.RotateTowards(transformRightArm.transform.right, RightArmDirection, 180, 0.0f);
+            transformRightArm.right = RightArmDirection;
+
+            Vector3 RightForeArmDirection = vector3RightHand - vector3RightForeArm;
+            //Vector3 RightForeArmNewDirection = Vector3.RotateTowards(transformRightForeArm.transform.right, RightForeArmDirection, 180, 0.0f);
+            transformRightForeArm.right = RightForeArmDirection;
+            
+            Vector3 LeftArmDirection = vector3LeftForeArm - vector3LeftArm;
+            //Vector3 LeftArmNewDirection = Vector3.RotateTowards(transformLeftArm.transform.right * -1, LeftArmDirection, 180, 0.0f);
+            transformLeftArm.right = LeftArmDirection * -1;
+
+            Vector3 LeftForeArmDirection = vector3LeftHand - vector3LeftForeArm;
+            //Vector3 LeftForeArmNewDirection = Vector3.RotateTowards(transformLeftForeArm.transform.right * -1, LeftForeArmDirection, 180, 0.0f);
+            transformLeftForeArm.right = LeftForeArmDirection * -1;
+            
+            Vector3 RightUpLegDirection = vector3RightLeg - vector3RightUpLeg;
+            //Vector3 RightUpLegNewDirection = Vector3.RotateTowards(transformRightUpLeg.transform.up * -1, RightUpLegDirection, 180, 0.0f);
+            transformRightUpLeg.up = RightUpLegDirection * -1;
+
+            Vector3 RightLegDirection = vector3RightFoot - vector3RightLeg;
+            //Vector3 RightLegNewDirection = Vector3.RotateTowards(transformRightLeg.transform.up * -1, RightLegDirection, 180, 0.0f);
+            transformRightLeg.up = RightLegDirection * -1;
+
+            Vector3 LeftUpLegDirection = vector3LeftLeg - vector3LeftUpLeg;
+            //Vector3 LeftUpLegNewDirection = Vector3.RotateTowards(transformLeftUpLeg.transform.up * -1, LeftUpLegDirection, 180, 0.0f);
+            transformLeftUpLeg.up = LeftUpLegDirection * -1;
+
+            Vector3 LeftLegDirection = vector3LeftFoot - vector3LeftLeg;
+            //Vector3 LeftLegNewDirection = Vector3.RotateTowards(transformLeftLeg.transform.up * -1, LeftLegDirection, 180, 0.0f);
+            transformLeftLeg.up = LeftLegDirection * -1;
+            
         }
+        //用給定位置改變人體模型位置
         else
         {
-            counter += 1;
+            //第二關節目標位置-第一關節現在位置得出 第一關節在第二關節就定位時應該要有的ROTATION
+            //在每個部位計算旋轉角度前 先固定該部位的當前位置(使用者給定位置座標)
+            //使腹部與胸部相接(看之後智慧衣是否會提供角向量)
+            transformAbdomen.position = vector3abdomen;
+            this.ComputeAbdomenRotation();
+
+            //使胸部與右手相接
+            transformChest.position = vector3Chest;
+            this.ComputeChestRotation();
+
+            //使胸口骨骼與兩手臂的位置相接
+            this.ComputeRightShoulderBoneRotation();
+            this.ComputeLeftShoulderBoneRotation();
+
+            //使右手臂朝向右前臂
+            transformRightArm.position = vector3RightArm;
+            this.ComputeRightArmRotation();
+
+            //使右前臂朝向右手腕
+            transformRightForeArm.position = vector3RightForeArm;
+            this.ComputeRightForeArmRotation();
+            transformRightHand.position = vector3RightHand;
+
+            //使左手臂朝向左前臂
+            transformLeftArm.position = vector3LeftArm;
+            this.ComputeLeftArmRotation();
+
+            //使左前臂朝向左手腕
+            transformLeftForeArm.position = vector3LeftForeArm;
+            this.ComputeLeftForeArmRotation();
+            transformLeftHand.position = vector3LeftHand;
+
+            //使右大腿朝向右腿
+            transformRightUpLeg.position = vector3RightUpLeg;
+            this.ComputeRightUpLegRotation();
+
+            //使右腿朝向右腳踝
+            transformRightLeg.position = vector3RightLeg;
+            this.ComputeRightLegRotation();
+            transformRightFoot.position = vector3RightFoot;
+
+            //使左大腿朝向左腿
+            transformLeftUpLeg.position = vector3LeftUpLeg;
+            this.ComputeLeftUpLegRotation();
+
+            //使左腿朝向左腳踝
+            transformLeftLeg.position = vector3LeftLeg;
+            this.ComputeLeftLegRotation();
+            transformLeftFoot.position = vector3LeftFoot;
         }
-        //vector3RightForeArm.y += (float)0.005 * double_num;
-        //vector3RightArm.y += (float)0.001 * double_num;
 
-        //第二關節目標位置-第一關節現在位置得出 第一關節在第二關節就定位時應該要有的ROTATION
-        //在每個部位計算旋轉角度前 先固定該部位的當前位置(使用者給定位置座標)
-        //使腹部與胸部相接(看之後智慧衣是否會提供角向量)
-        transformAbdomen.position = vector3abdomen;
-        this.ComputeAbdomenRotation();
-        
-        //使胸部與右手相接
-        transformChest.position = vector3Chest;
-        this.ComputeChestRotation();
-        
-        //使胸口骨骼與兩手臂的位置相接
-        this.ComputeRightShoulderBoneRotation();
-        this.ComputeLeftShoulderBoneRotation();
 
-        //使右手臂朝向右前臂
-        transformRightArm.position = vector3RightArm;
-        this.ComputeRightArmRotation();
 
-        //使右前臂朝向右手腕
-        transformRightForeArm.position = vector3RightForeArm;
-        this.ComputeRightForeArmRotation();
-        transformRightHand.position = vector3RightHand;        
-
-        //使左手臂朝向左前臂
-        transformLeftArm.position = vector3LeftArm;
-        this.ComputeLeftArmRotation();
-
-        //使左前臂朝向左手腕
-        transformLeftForeArm.position = vector3LeftForeArm;
-        this.ComputeLeftForeArmRotation();
-        transformLeftHand.position = vector3LeftHand;
-
-        //使右大腿朝向右腿
-        transformRightUpLeg.position = vector3RightUpLeg;
-        this.ComputeRightUpLegRotation();
-
-        //使右腿朝向右腳踝
-        transformRightLeg.position = vector3RightLeg;
-        this.ComputeRightLegRotation();
-        transformRightFoot.position = vector3RightFoot;
-
-        //使左大腿朝向左腿
-        transformLeftUpLeg.position = vector3LeftUpLeg;
-        this.ComputeLeftUpLegRotation();
-
-        //使左腿朝向左腳踝
-        transformLeftLeg.position = vector3LeftLeg;
-        this.ComputeLeftLegRotation();
-        transformLeftFoot.position = vector3LeftFoot;
         
         /*
         //搞成WORLD
@@ -512,7 +564,7 @@ public class User_posture : MonoBehaviour
     {
         Vector3 AbdomenDirection = vector3Chest - transformAbdomen.position;
         Vector3 AbdomenNewDirection = Vector3.RotateTowards(transformAbdomen.transform.up, AbdomenDirection, 360, 0.0f);
-        transformAbdomen.up =  AbdomenDirection;
+        transformAbdomen.up = AbdomenNewDirection;
     }
     /// <summary>
     /// 計算胸口與"右手臂"間的ROTATION
