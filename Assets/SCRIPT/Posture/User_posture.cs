@@ -10,6 +10,12 @@ public class User_posture : MonoBehaviour
     [SerializeField]
     private bool boolChangeToVectorMode = true;
 
+    /// <summary>
+    /// 使用JSON資料來更改關節位置
+    /// </summary>
+    [SerializeField]
+    private bool boolChangeToJsonData = true;
+
 
     [SerializeField] [Header("腹部")]
     private Transform transformAbdomen = null;
@@ -80,8 +86,11 @@ public class User_posture : MonoBehaviour
 
 
     /*****************取出資料中的關節部位資訊*************************/
-
+    //儲存CSV資料的關節位置
     private float[][] FloatArray = null;
+
+    //儲存JSON資料的關節位置
+    private bodiesList m_bodyList = null;
 
     /// <summary>
     /// 人物關節位置 資料中的INDEX 奇數為X 偶數為Y 0為部位名稱
@@ -149,252 +158,335 @@ public class User_posture : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        //FloatArray收到資訊 代表開始進行動作 clock歸0 方可開始進行判斷
-        if (FloatArray != null && clock <= -1)
+        //是否為讀取JSON格式資料 不是的話就是CSV資料 CSV資料為一行X行Y
+        if (!boolChangeToJsonData)
         {
-            clock = 0;
-        }
-
-        //將得到的資料輸入進身體資訊 同時進行平滑化(沒更改位置但給值)
-        if (FloatArray != null)
-        {
-            //10貞+1 CHECK(資料行數) 每2個(以X為準)CHECK進行一次位置處理
-            if (clock >= 10)
+            //FloatArray收到資訊 代表開始進行動作 clock歸0 方可開始進行判斷
+            if (FloatArray != null && clock <= -1)
             {
-
-                //
-                //Length-2 是因為CSV會多2行
-                //
-                if (FloatArray.Length - 2 > check)
-                {
-
-                    if (check % 2 == 0 && check != 0 && check < 4)
-                    {
-
-                        //使Z軸進行移動
-                        if (LeftForeArmPostion > 30) L_foreArmNum *= -1;
-                        else if (LeftForeArmPostion < 0) L_foreArmNum *= -1;
-                        LeftForeArmPostion += 1 * L_foreArmNum;
-
-                        if (RightForeArmPostion > 30) R_foreArmNum *= -1;
-                        else if (RightForeArmPostion < 0) R_foreArmNum *= -1;
-                        RightForeArmPostion += 1 * R_foreArmNum;
-
-
-                        if (tempRightHandPostion > 60) HandNum *= -1;
-                        else if (tempRightHandPostion < 55) HandNum *= -1;
-                        tempRightHandPostion += 1 * HandNum;
-
-                        //移動平滑化
-                        Abdomen = new Vector2(FloatArray[check - 1][m_DataToBodyPart[0]], FloatArray[check][m_DataToBodyPart[0]]);
-                        Chest = new Vector2(FloatArray[check - 1][m_DataToBodyPart[1]], FloatArray[check][m_DataToBodyPart[1]]);
-                        RA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[2]], FloatArray[check][m_DataToBodyPart[2]]);
-                        RFA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]]);
-                        RH = new Vector2(FloatArray[check - 1][m_DataToBodyPart[4]], FloatArray[check][m_DataToBodyPart[4]]);
-                        LA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[5]], FloatArray[check][m_DataToBodyPart[5]]);
-                        LFA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]]);
-                        LH = new Vector2(FloatArray[check - 1][m_DataToBodyPart[7]], FloatArray[check][m_DataToBodyPart[7]]);
-                        RUL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[8]], FloatArray[check][m_DataToBodyPart[8]]);
-                        RL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[9]], FloatArray[check][m_DataToBodyPart[9]]);
-                        RF = new Vector2(FloatArray[check - 1][m_DataToBodyPart[10]], FloatArray[check][m_DataToBodyPart[10]]);
-                        LUL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[11]], FloatArray[check][m_DataToBodyPart[11]]);
-                        LL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[12]], FloatArray[check][m_DataToBodyPart[12]]);
-                        LF = new Vector2(FloatArray[check - 1][m_DataToBodyPart[13]], FloatArray[check][m_DataToBodyPart[13]]);
-
-
-                        //設定關節位置
-                        this.SetAbdomenPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[0]], FloatArray[check][m_DataToBodyPart[0]], 0));
-                        this.SetChestPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[1]], FloatArray[check][m_DataToBodyPart[1]], 5));
-                        this.SetRightArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[2]], FloatArray[check][m_DataToBodyPart[2]], 0));
-                        this.SetRightForeArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]], RightForeArmPostion));
-                        this.SetRightHandPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[4]], FloatArray[check][m_DataToBodyPart[4]], tempRightHandPostion));
-                        this.SetLeftArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[5]], FloatArray[check][m_DataToBodyPart[5]], 0));
-                        this.SetLeftForeArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]], LeftForeArmPostion));
-                        this.SetLeftHandPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[7]], FloatArray[check][m_DataToBodyPart[7]], tempRightHandPostion));
-                        this.SetRightUpLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[8]], FloatArray[check][m_DataToBodyPart[8]], 0));
-                        this.SetRightLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[9]], FloatArray[check][m_DataToBodyPart[9]], 0));
-                        this.SetRightFootPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[10]], FloatArray[check][m_DataToBodyPart[10]], 5));
-                        this.SetLeftUpLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[11]], FloatArray[check][m_DataToBodyPart[11]], 0));
-                        this.SetLeftLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[12]], FloatArray[check][m_DataToBodyPart[12]], 0));
-                        this.SetLeftFootPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[13]], FloatArray[check][m_DataToBodyPart[13]], 5));
-                        /*
-                        m_UserPosture.SetAbdomenPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[0]]), float.Parse(Array[check][m_DataToBodyPart[0]]), 0));
-                        m_UserPosture.SetChestPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[1]]), float.Parse(Array[check][m_DataToBodyPart[1]]), 0));
-                        m_UserPosture.SetRightArmPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[2]]), float.Parse(Array[check][m_DataToBodyPart[2]]), 0));
-                        m_UserPosture.SetRightForeArmPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[3]]), float.Parse(Array[check][m_DataToBodyPart[3]]), 15));
-                        m_UserPosture.SetRightHandPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[4]]), float.Parse(Array[check][m_DataToBodyPart[4]]), 60));
-                        m_UserPosture.SetLeftArmPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[5]]), float.Parse(Array[check][m_DataToBodyPart[5]]), 0));
-                        m_UserPosture.SetLeftForeArmPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[6]]), float.Parse(Array[check][m_DataToBodyPart[6]]), 15));
-                        m_UserPosture.SetLeftHandPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[7]]), float.Parse(Array[check][m_DataToBodyPart[7]]), 60));
-                        m_UserPosture.SetRightUpLegPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[8]]), float.Parse(Array[check][m_DataToBodyPart[8]]), 0));
-                        m_UserPosture.SetRightLegPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[9]]), float.Parse(Array[check][m_DataToBodyPart[9]]), 0));
-                        m_UserPosture.SetRightFootPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[10]]), float.Parse(Array[check][m_DataToBodyPart[10]]), 0));
-                        m_UserPosture.SetLeftUpLegPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[11]]), float.Parse(Array[check][m_DataToBodyPart[11]]), 0));
-                        m_UserPosture.SetLeftLegPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[12]]), float.Parse(Array[check][m_DataToBodyPart[12]]), 0));
-                        m_UserPosture.SetLeftFootPostion(new Vector3(float.Parse(Array[check - 1][m_DataToBodyPart[13]]), float.Parse(Array[check][m_DataToBodyPart[13]]), 0));
-                         */
-                    }
-                    else if (check % 2 == 0 && check != 0)
-                    {
-                        //使Z軸進行移動
-                        if (LeftForeArmPostion > 30) L_foreArmNum *= -1;
-                        else if (LeftForeArmPostion < 0) L_foreArmNum *= -1;
-                        LeftForeArmPostion += 1 * L_foreArmNum;
-
-                        if (RightForeArmPostion > 30) R_foreArmNum *= -1;
-                        else if (RightForeArmPostion < 0) R_foreArmNum *= -1;
-                        RightForeArmPostion += 1 * R_foreArmNum;
-
-
-                        if (tempRightHandPostion > 60) HandNum *= -1;
-                        else if (tempRightHandPostion < 55) HandNum *= -1;
-                        tempRightHandPostion += 1 * HandNum;
-
-                        //RFA= Vector2.Lerp( new Vector2(FloatArray[check - 3][m_DataToBodyPart[3]], FloatArray[check - 2][m_DataToBodyPart[3]]), new Vector2(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]]), 1f * Time.deltaTime);
-                        //LFA = Vector2.Lerp(new Vector2(FloatArray[check - 3][m_DataToBodyPart[6]], FloatArray[check - 2][m_DataToBodyPart[6]]), new Vector2(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]]), 1f * Time.deltaTime);
-
-
-                    }
-                }
-                else
-                {
-                    check = 0;
-                    tempRightHandPostion = 55;
-                    RightForeArmPostion = 30;
-                    LeftForeArmPostion = 0;
-
-                    L_foreArmNum = 1;
-                    R_foreArmNum = -1;
-                    HandNum = 1;
-                }
-
-                check += 1;
                 clock = 0;
-
-                //CHECK每變換一次做一次計算
-                CompareData(FloatArray);
             }
-
-
-            //每楨都取SLERP CHECK單雙要注意  
-            if (check % 2 == 0 && check >= 4 && check != 0)
+            //將得到的資料輸入進身體資訊 同時進行平滑化(沒更改位置但給值)
+            if (FloatArray != null)
             {
+                //1貞+1 CHECK(資料行數) 每2個(以X為準)CHECK進行一次位置處理
+                if (clock >= 1)
+                {
+
+                    //
+                    //Length-2 是因為CSV會多2行
+                    //
+                    if (FloatArray.Length - 2 > check)
+                    {
+
+                        if (check % 2 == 0 && check != 0 && check < 4)
+                        {
+
+                            //使Z軸進行移動
+                            if (LeftForeArmPostion > 30) L_foreArmNum *= -1;
+                            else if (LeftForeArmPostion < 0) L_foreArmNum *= -1;
+                            LeftForeArmPostion += 1 * L_foreArmNum;
+
+                            if (RightForeArmPostion > 30) R_foreArmNum *= -1;
+                            else if (RightForeArmPostion < 0) R_foreArmNum *= -1;
+                            RightForeArmPostion += 1 * R_foreArmNum;
+
+
+                            if (tempRightHandPostion > 60) HandNum *= -1;
+                            else if (tempRightHandPostion < 55) HandNum *= -1;
+                            tempRightHandPostion += 1 * HandNum;
+
+                            //移動平滑化
+                            Abdomen = new Vector2(FloatArray[check - 1][m_DataToBodyPart[0]], FloatArray[check][m_DataToBodyPart[0]]);
+                            Chest = new Vector2(FloatArray[check - 1][m_DataToBodyPart[1]], FloatArray[check][m_DataToBodyPart[1]]);
+                            RA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[2]], FloatArray[check][m_DataToBodyPart[2]]);
+                            RFA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]]);
+                            RH = new Vector2(FloatArray[check - 1][m_DataToBodyPart[4]], FloatArray[check][m_DataToBodyPart[4]]);
+                            LA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[5]], FloatArray[check][m_DataToBodyPart[5]]);
+                            LFA = new Vector2(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]]);
+                            LH = new Vector2(FloatArray[check - 1][m_DataToBodyPart[7]], FloatArray[check][m_DataToBodyPart[7]]);
+                            RUL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[8]], FloatArray[check][m_DataToBodyPart[8]]);
+                            RL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[9]], FloatArray[check][m_DataToBodyPart[9]]);
+                            RF = new Vector2(FloatArray[check - 1][m_DataToBodyPart[10]], FloatArray[check][m_DataToBodyPart[10]]);
+                            LUL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[11]], FloatArray[check][m_DataToBodyPart[11]]);
+                            LL = new Vector2(FloatArray[check - 1][m_DataToBodyPart[12]], FloatArray[check][m_DataToBodyPart[12]]);
+                            LF = new Vector2(FloatArray[check - 1][m_DataToBodyPart[13]], FloatArray[check][m_DataToBodyPart[13]]);
+
+
+                            //設定關節位置
+                            this.SetAbdomenPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[0]], FloatArray[check][m_DataToBodyPart[0]], 0));
+                            this.SetChestPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[1]], FloatArray[check][m_DataToBodyPart[1]], 5));
+                            this.SetRightArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[2]], FloatArray[check][m_DataToBodyPart[2]], 0));
+                            this.SetRightForeArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]], RightForeArmPostion));
+                            this.SetRightHandPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[4]], FloatArray[check][m_DataToBodyPart[4]], tempRightHandPostion));
+                            this.SetLeftArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[5]], FloatArray[check][m_DataToBodyPart[5]], 0));
+                            this.SetLeftForeArmPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]], LeftForeArmPostion));
+                            this.SetLeftHandPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[7]], FloatArray[check][m_DataToBodyPart[7]], tempRightHandPostion));
+                            this.SetRightUpLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[8]], FloatArray[check][m_DataToBodyPart[8]], 0));
+                            this.SetRightLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[9]], FloatArray[check][m_DataToBodyPart[9]], 0));
+                            this.SetRightFootPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[10]], FloatArray[check][m_DataToBodyPart[10]], 5));
+                            this.SetLeftUpLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[11]], FloatArray[check][m_DataToBodyPart[11]], 0));
+                            this.SetLeftLegPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[12]], FloatArray[check][m_DataToBodyPart[12]], 0));
+                            this.SetLeftFootPostion(new Vector3(FloatArray[check - 1][m_DataToBodyPart[13]], FloatArray[check][m_DataToBodyPart[13]], 5));
+
+                        }
+                        else if (check % 2 == 0 && check != 0)
+                        {
+                            //使Z軸進行移動
+                            if (LeftForeArmPostion > 30) L_foreArmNum *= -1;
+                            else if (LeftForeArmPostion < 0) L_foreArmNum *= -1;
+                            LeftForeArmPostion += 1 * L_foreArmNum;
+
+                            if (RightForeArmPostion > 30) R_foreArmNum *= -1;
+                            else if (RightForeArmPostion < 0) R_foreArmNum *= -1;
+                            RightForeArmPostion += 1 * R_foreArmNum;
+
+
+                            if (tempRightHandPostion > 60) HandNum *= -1;
+                            else if (tempRightHandPostion < 55) HandNum *= -1;
+                            tempRightHandPostion += 1 * HandNum;
+
+                            //RFA= Vector2.Lerp( new Vector2(FloatArray[check - 3][m_DataToBodyPart[3]], FloatArray[check - 2][m_DataToBodyPart[3]]), new Vector2(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]]), 1f * Time.deltaTime);
+                            //LFA = Vector2.Lerp(new Vector2(FloatArray[check - 3][m_DataToBodyPart[6]], FloatArray[check - 2][m_DataToBodyPart[6]]), new Vector2(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]]), 1f * Time.deltaTime);
+
+
+                        }
+                    }
+                    else
+                    {
+                        check = 0;
+                        tempRightHandPostion = 55;
+                        RightForeArmPostion = 30;
+                        LeftForeArmPostion = 0;
+
+                        L_foreArmNum = 1;
+                        R_foreArmNum = -1;
+                        HandNum = 1;
+                    }
+
+                    check += 1;
+                    clock = 0;
+
+                    //CHECK每變換一次做一次計算
+                    CompareData(FloatArray);
+                }
+
+
+                //每楨都取SLERP CHECK單雙要注意  
+                if (check % 2 == 0 && check >= 4 && check != 0)
+                {
 
 
 
-                //關節移動平滑
-                Abdomen = Vector2.Lerp(Abdomen, new Vector2(FloatArray[check - 1][m_DataToBodyPart[0]], FloatArray[check][m_DataToBodyPart[0]]), 10f * Time.deltaTime);
-                Chest = Vector2.Lerp(Chest, new Vector2(FloatArray[check - 1][m_DataToBodyPart[1]], FloatArray[check][m_DataToBodyPart[1]]), 10f * Time.deltaTime);
-                RA = Vector2.Lerp(RA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[2]], FloatArray[check][m_DataToBodyPart[2]]), 10f * Time.deltaTime);
-                RFA = Vector2.Lerp(RFA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]]), 10f * Time.deltaTime);
-                RH = Vector2.Lerp(RH, new Vector2(FloatArray[check - 1][m_DataToBodyPart[4]], FloatArray[check][m_DataToBodyPart[4]]), 10f * Time.deltaTime);
-                LA = Vector2.Lerp(LA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[5]], FloatArray[check][m_DataToBodyPart[5]]), 10f * Time.deltaTime);
-                LFA = Vector2.Lerp(LFA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]]), 10f * Time.deltaTime);
-                LH = Vector2.Lerp(LH, new Vector2(FloatArray[check - 1][m_DataToBodyPart[7]], FloatArray[check][m_DataToBodyPart[7]]), 10f * Time.deltaTime);
-                RUL = Vector2.Lerp(RUL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[8]], FloatArray[check][m_DataToBodyPart[8]]), 10f * Time.deltaTime);
-                RL = Vector2.Lerp(RL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[9]], FloatArray[check][m_DataToBodyPart[9]]), 10f * Time.deltaTime);
-                RF = Vector2.Lerp(RF, new Vector2(FloatArray[check - 1][m_DataToBodyPart[10]], FloatArray[check][m_DataToBodyPart[10]]), 10f * Time.deltaTime);
-                LUL = Vector2.Lerp(LUL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[11]], FloatArray[check][m_DataToBodyPart[11]]), 10f * Time.deltaTime);
-                LL = Vector2.Lerp(LL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[12]], FloatArray[check][m_DataToBodyPart[12]]), 10f * Time.deltaTime);
-                LF = Vector2.Lerp(LF, new Vector2(FloatArray[check - 1][m_DataToBodyPart[13]], FloatArray[check][m_DataToBodyPart[13]]), 10f * Time.deltaTime);
+                    //關節移動平滑
+                    Abdomen = Vector2.Lerp(Abdomen, new Vector2(FloatArray[check - 1][m_DataToBodyPart[0]], FloatArray[check][m_DataToBodyPart[0]]), 10f * Time.deltaTime);
+                    Chest = Vector2.Lerp(Chest, new Vector2(FloatArray[check - 1][m_DataToBodyPart[1]], FloatArray[check][m_DataToBodyPart[1]]), 10f * Time.deltaTime);
+                    RA = Vector2.Lerp(RA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[2]], FloatArray[check][m_DataToBodyPart[2]]), 10f * Time.deltaTime);
+                    RFA = Vector2.Lerp(RFA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[3]], FloatArray[check][m_DataToBodyPart[3]]), 10f * Time.deltaTime);
+                    RH = Vector2.Lerp(RH, new Vector2(FloatArray[check - 1][m_DataToBodyPart[4]], FloatArray[check][m_DataToBodyPart[4]]), 10f * Time.deltaTime);
+                    LA = Vector2.Lerp(LA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[5]], FloatArray[check][m_DataToBodyPart[5]]), 10f * Time.deltaTime);
+                    LFA = Vector2.Lerp(LFA, new Vector2(FloatArray[check - 1][m_DataToBodyPart[6]], FloatArray[check][m_DataToBodyPart[6]]), 10f * Time.deltaTime);
+                    LH = Vector2.Lerp(LH, new Vector2(FloatArray[check - 1][m_DataToBodyPart[7]], FloatArray[check][m_DataToBodyPart[7]]), 10f * Time.deltaTime);
+                    RUL = Vector2.Lerp(RUL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[8]], FloatArray[check][m_DataToBodyPart[8]]), 10f * Time.deltaTime);
+                    RL = Vector2.Lerp(RL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[9]], FloatArray[check][m_DataToBodyPart[9]]), 10f * Time.deltaTime);
+                    RF = Vector2.Lerp(RF, new Vector2(FloatArray[check - 1][m_DataToBodyPart[10]], FloatArray[check][m_DataToBodyPart[10]]), 10f * Time.deltaTime);
+                    LUL = Vector2.Lerp(LUL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[11]], FloatArray[check][m_DataToBodyPart[11]]), 10f * Time.deltaTime);
+                    LL = Vector2.Lerp(LL, new Vector2(FloatArray[check - 1][m_DataToBodyPart[12]], FloatArray[check][m_DataToBodyPart[12]]), 10f * Time.deltaTime);
+                    LF = Vector2.Lerp(LF, new Vector2(FloatArray[check - 1][m_DataToBodyPart[13]], FloatArray[check][m_DataToBodyPart[13]]), 10f * Time.deltaTime);
 
-                //設定關節位置
-                /*
-                 * TODO 未來可能需要設定不同身體的SCALE 因此可能得考慮在開始前站立測量
-                 * 
-                m_UserPosture.SetAbdomenPostion(new Vector3(Abdomen.x/200f, Abdomen.y / 200f, 0));
-                m_UserPosture.SetChestPostion(new Vector3(Chest.x / 200f, Chest.y / 200f, 0));
-                m_UserPosture.SetRightArmPostion(new Vector3(RA.x / 200f, RA.y / 200f, 0));
-                m_UserPosture.SetRightForeArmPostion(new Vector3(RFA.x / 200f, RFA.y / 200f, 0.1f));
-                m_UserPosture.SetRightHandPostion(new Vector3(RH.x / 200f, RH.y / 200f, 0.5f));
-                m_UserPosture.SetLeftArmPostion(new Vector3(LA.x / 200f, LA.y / 200f, 0));
-                m_UserPosture.SetLeftForeArmPostion(new Vector3(LFA.x / 200f, LFA.y / 200f, 0.1f));
-                m_UserPosture.SetLeftHandPostion(new Vector3(LH.x / 200f, LH.y / 200f, 0.5f));
-                m_UserPosture.SetRightUpLegPostion(new Vector3(RUL.x / 200f, RUL.y / 200f, 0));
-                m_UserPosture.SetRightLegPostion(new Vector3(RL.x / 200f, RL.y / 200f, 0));
-                m_UserPosture.SetRightFootPostion(new Vector3(RF.x / 200f, RF.y / 200f, 0));
-                m_UserPosture.SetLeftUpLegPostion(new Vector3(LUL.x / 200f, LUL.y / 200f, 0));
-                m_UserPosture.SetLeftLegPostion(new Vector3(LL.x / 200f, LL.y / 200f, 0));
-                m_UserPosture.SetLeftFootPostion(new Vector3(LF.x / 200f, LF.y / 200f, 0));
-                */
+                    //設定關節位置
+                    /*
+                     * TODO 未來可能需要設定不同身體的SCALE 因此可能得考慮在開始前站立測量
+                     * 
+                    */
 
-                this.SetAbdomenPostion(new Vector3(Abdomen.x, Abdomen.y, 0));
-                this.SetChestPostion(new Vector3(Chest.x, Chest.y, 5));
-                this.SetRightArmPostion(new Vector3(RA.x, RA.y, 0));
-                this.SetRightForeArmPostion(new Vector3(RFA.x, RFA.y, RightForeArmPostion));
-                this.SetRightHandPostion(new Vector3(RH.x, RH.y, RightForeArmPostion + 50));
-                this.SetLeftArmPostion(new Vector3(LA.x, LA.y, 0));
-                this.SetLeftForeArmPostion(new Vector3(LFA.x, LFA.y, LeftForeArmPostion));
-                this.SetLeftHandPostion(new Vector3(LH.x, LH.y, LeftForeArmPostion + 50));
-                this.SetRightUpLegPostion(new Vector3(RUL.x, RUL.y, 0));
-                this.SetRightLegPostion(new Vector3(RL.x, RL.y, 0));
-                this.SetRightFootPostion(new Vector3(RF.x, RF.y, 5));
-                this.SetLeftUpLegPostion(new Vector3(LUL.x, LUL.y, 0));
-                this.SetLeftLegPostion(new Vector3(LL.x, LL.y, 0));
-                this.SetLeftFootPostion(new Vector3(LF.x, LF.y, 5));
+                    this.SetAbdomenPostion(new Vector3(Abdomen.x, Abdomen.y, 0));
+                    this.SetChestPostion(new Vector3(Chest.x, Chest.y, 5));
+                    this.SetRightArmPostion(new Vector3(RA.x, RA.y, 0));
+                    this.SetRightForeArmPostion(new Vector3(RFA.x, RFA.y, RightForeArmPostion));
+                    this.SetRightHandPostion(new Vector3(RH.x, RH.y, RightForeArmPostion + 50));
+                    this.SetLeftArmPostion(new Vector3(LA.x, LA.y, 0));
+                    this.SetLeftForeArmPostion(new Vector3(LFA.x, LFA.y, LeftForeArmPostion));
+                    this.SetLeftHandPostion(new Vector3(LH.x, LH.y, LeftForeArmPostion + 50));
+                    this.SetRightUpLegPostion(new Vector3(RUL.x, RUL.y, 0));
+                    this.SetRightLegPostion(new Vector3(RL.x, RL.y, 0));
+                    this.SetRightFootPostion(new Vector3(RF.x, RF.y, 5));
+                    this.SetLeftUpLegPostion(new Vector3(LUL.x, LUL.y, 0));
+                    this.SetLeftLegPostion(new Vector3(LL.x, LL.y, 0));
+                    this.SetLeftFootPostion(new Vector3(LF.x, LF.y, 5));
+                }
+                else if (check % 2 == 1 && check >= 4 && check != 0)
+                {
+
+
+                    //關節移動平滑
+                    Abdomen = Vector2.Lerp(Abdomen, new Vector2(FloatArray[check - 2][m_DataToBodyPart[0]], FloatArray[check - 1][m_DataToBodyPart[0]]), 10f * Time.deltaTime);
+                    Chest = Vector2.Lerp(Chest, new Vector2(FloatArray[check - 2][m_DataToBodyPart[1]], FloatArray[check - 1][m_DataToBodyPart[1]]), 10f * Time.deltaTime);
+                    RA = Vector2.Lerp(RA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[2]], FloatArray[check - 1][m_DataToBodyPart[2]]), 10f * Time.deltaTime);
+                    RFA = Vector2.Lerp(RFA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[3]], FloatArray[check - 1][m_DataToBodyPart[3]]), 10f * Time.deltaTime);
+                    RH = Vector2.Lerp(RH, new Vector2(FloatArray[check - 2][m_DataToBodyPart[4]], FloatArray[check - 1][m_DataToBodyPart[4]]), 10f * Time.deltaTime);
+                    LA = Vector2.Lerp(LA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[5]], FloatArray[check - 1][m_DataToBodyPart[5]]), 10f * Time.deltaTime);
+                    LFA = Vector2.Lerp(LFA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[6]], FloatArray[check - 1][m_DataToBodyPart[6]]), 10f * Time.deltaTime);
+                    LH = Vector2.Lerp(LH, new Vector2(FloatArray[check - 2][m_DataToBodyPart[7]], FloatArray[check - 1][m_DataToBodyPart[7]]), 10f * Time.deltaTime);
+                    RUL = Vector2.Lerp(RUL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[8]], FloatArray[check - 1][m_DataToBodyPart[8]]), 10f * Time.deltaTime);
+                    RL = Vector2.Lerp(RL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[9]], FloatArray[check - 1][m_DataToBodyPart[9]]), 10f * Time.deltaTime);
+                    RF = Vector2.Lerp(RF, new Vector2(FloatArray[check - 2][m_DataToBodyPart[10]], FloatArray[check - 1][m_DataToBodyPart[10]]), 10f * Time.deltaTime);
+                    LUL = Vector2.Lerp(LUL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[11]], FloatArray[check - 1][m_DataToBodyPart[11]]), 10f * Time.deltaTime);
+                    LL = Vector2.Lerp(LL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[12]], FloatArray[check - 1][m_DataToBodyPart[12]]), 10f * Time.deltaTime);
+                    LF = Vector2.Lerp(LF, new Vector2(FloatArray[check - 2][m_DataToBodyPart[13]], FloatArray[check - 1][m_DataToBodyPart[13]]), 10f * Time.deltaTime);
+
+                    //設定關節位置
+
+                    /*
+                     * TODO 未來可能需要設定不同身體的SCALE 因此可能得考慮在開始前站立測量
+                     * 
+                    */
+
+                    this.SetAbdomenPostion(new Vector3(Abdomen.x, Abdomen.y, 0));
+                    this.SetChestPostion(new Vector3(Chest.x, Chest.y, 5));
+                    this.SetRightArmPostion(new Vector3(RA.x, RA.y, 0));
+                    this.SetRightForeArmPostion(new Vector3(RFA.x, RFA.y, RightForeArmPostion));
+                    this.SetRightHandPostion(new Vector3(RH.x, RH.y, RightForeArmPostion + 50));
+                    this.SetLeftArmPostion(new Vector3(LA.x, LA.y, 0));
+                    this.SetLeftForeArmPostion(new Vector3(LFA.x, LFA.y, LeftForeArmPostion));
+                    this.SetLeftHandPostion(new Vector3(LH.x, LH.y, LeftForeArmPostion + 50));
+                    this.SetRightUpLegPostion(new Vector3(RUL.x, RUL.y, 0));
+                    this.SetRightLegPostion(new Vector3(RL.x, RL.y, 0));
+                    this.SetRightFootPostion(new Vector3(RF.x, RF.y, 5));
+                    this.SetLeftUpLegPostion(new Vector3(LUL.x, LUL.y, 0));
+                    this.SetLeftLegPostion(new Vector3(LL.x, LL.y, 0));
+                    this.SetLeftFootPostion(new Vector3(LF.x, LF.y, 5));
+
+                }
+
+                if (clock >= 0)
+                    clock += 1;
             }
-            else if (check % 2 == 1 && check >= 4 && check != 0)
-            {
 
-
-                //關節移動平滑
-                Abdomen = Vector2.Lerp(Abdomen, new Vector2(FloatArray[check - 2][m_DataToBodyPart[0]], FloatArray[check - 1][m_DataToBodyPart[0]]), 10f * Time.deltaTime);
-                Chest = Vector2.Lerp(Chest, new Vector2(FloatArray[check - 2][m_DataToBodyPart[1]], FloatArray[check - 1][m_DataToBodyPart[1]]), 10f * Time.deltaTime);
-                RA = Vector2.Lerp(RA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[2]], FloatArray[check - 1][m_DataToBodyPart[2]]), 10f * Time.deltaTime);
-                RFA = Vector2.Lerp(RFA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[3]], FloatArray[check - 1][m_DataToBodyPart[3]]), 10f * Time.deltaTime);
-                RH = Vector2.Lerp(RH, new Vector2(FloatArray[check - 2][m_DataToBodyPart[4]], FloatArray[check - 1][m_DataToBodyPart[4]]), 10f * Time.deltaTime);
-                LA = Vector2.Lerp(LA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[5]], FloatArray[check - 1][m_DataToBodyPart[5]]), 10f * Time.deltaTime);
-                LFA = Vector2.Lerp(LFA, new Vector2(FloatArray[check - 2][m_DataToBodyPart[6]], FloatArray[check - 1][m_DataToBodyPart[6]]), 10f * Time.deltaTime);
-                LH = Vector2.Lerp(LH, new Vector2(FloatArray[check - 2][m_DataToBodyPart[7]], FloatArray[check - 1][m_DataToBodyPart[7]]), 10f * Time.deltaTime);
-                RUL = Vector2.Lerp(RUL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[8]], FloatArray[check - 1][m_DataToBodyPart[8]]), 10f * Time.deltaTime);
-                RL = Vector2.Lerp(RL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[9]], FloatArray[check - 1][m_DataToBodyPart[9]]), 10f * Time.deltaTime);
-                RF = Vector2.Lerp(RF, new Vector2(FloatArray[check - 2][m_DataToBodyPart[10]], FloatArray[check - 1][m_DataToBodyPart[10]]), 10f * Time.deltaTime);
-                LUL = Vector2.Lerp(LUL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[11]], FloatArray[check - 1][m_DataToBodyPart[11]]), 10f * Time.deltaTime);
-                LL = Vector2.Lerp(LL, new Vector2(FloatArray[check - 2][m_DataToBodyPart[12]], FloatArray[check - 1][m_DataToBodyPart[12]]), 10f * Time.deltaTime);
-                LF = Vector2.Lerp(LF, new Vector2(FloatArray[check - 2][m_DataToBodyPart[13]], FloatArray[check - 1][m_DataToBodyPart[13]]), 10f * Time.deltaTime);
-
-                //設定關節位置
-
-                /*
-                 * TODO 未來可能需要設定不同身體的SCALE 因此可能得考慮在開始前站立測量
-                 * 
-                m_UserPosture.SetAbdomenPostion(new Vector3(Abdomen.x / 200f, Abdomen.y / 200f, 0));
-                m_UserPosture.SetChestPostion(new Vector3(Chest.x / 200f, Chest.y / 200f, 0));
-                m_UserPosture.SetRightArmPostion(new Vector3(RA.x / 200f, RA.y / 200f, 0));
-                m_UserPosture.SetRightForeArmPostion(new Vector3(RFA.x / 200f, RFA.y / 200f, 0.1f));
-                m_UserPosture.SetRightHandPostion(new Vector3(RH.x / 200f, RH.y / 200f, 0.5f));
-                m_UserPosture.SetLeftArmPostion(new Vector3(LA.x / 200f, LA.y / 200f, 0));
-                m_UserPosture.SetLeftForeArmPostion(new Vector3(LFA.x / 200f, LFA.y / 200f, 0.1f));
-                m_UserPosture.SetLeftHandPostion(new Vector3(LH.x / 200f, LH.y / 200f, 0.5f));
-                m_UserPosture.SetRightUpLegPostion(new Vector3(RUL.x / 200f, RUL.y / 200f, 0));
-                m_UserPosture.SetRightLegPostion(new Vector3(RL.x / 200f, RL.y / 200f, 0));
-                m_UserPosture.SetRightFootPostion(new Vector3(RF.x / 200f, RF.y / 200f, 0));
-                m_UserPosture.SetLeftUpLegPostion(new Vector3(LUL.x / 200f, LUL.y / 200f, 0));
-                m_UserPosture.SetLeftLegPostion(new Vector3(LL.x / 200f, LL.y / 200f, 0));
-                m_UserPosture.SetLeftFootPostion(new Vector3(LF.x / 200f, LF.y / 200f, 0));
-                */
-
-                this.SetAbdomenPostion(new Vector3(Abdomen.x, Abdomen.y, 0));
-                this.SetChestPostion(new Vector3(Chest.x, Chest.y, 5));
-                this.SetRightArmPostion(new Vector3(RA.x, RA.y, 0));
-                this.SetRightForeArmPostion(new Vector3(RFA.x, RFA.y, RightForeArmPostion));
-                this.SetRightHandPostion(new Vector3(RH.x, RH.y, RightForeArmPostion + 50));
-                this.SetLeftArmPostion(new Vector3(LA.x, LA.y, 0));
-                this.SetLeftForeArmPostion(new Vector3(LFA.x, LFA.y, LeftForeArmPostion));
-                this.SetLeftHandPostion(new Vector3(LH.x, LH.y, LeftForeArmPostion + 50));
-                this.SetRightUpLegPostion(new Vector3(RUL.x, RUL.y, 0));
-                this.SetRightLegPostion(new Vector3(RL.x, RL.y, 0));
-                this.SetRightFootPostion(new Vector3(RF.x, RF.y, 5));
-                this.SetLeftUpLegPostion(new Vector3(LUL.x, LUL.y, 0));
-                this.SetLeftLegPostion(new Vector3(LL.x, LL.y, 0));
-                this.SetLeftFootPostion(new Vector3(LF.x, LF.y, 5));
-
-            }
-
-            if (clock >= 0)
-                clock += 1;
         }
+        //若為JSON 則讀取傳入的BodyData資料
+        else
+        {
+
+            //m_bodyList收到資訊 代表開始進行動作 clock歸0 方可開始進行判斷
+            if (m_bodyList != null && clock <= -1)
+            {
+                clock = 0;
+            }
+            //將得到的資料輸入進身體資訊 同時進行平滑化(沒更改位置但給值)
+            if (m_bodyList != null)
+            {
+                
+                if (clock >= 1)
+                {
+                    if (m_bodyList.bodies.Length  > check)
+                    {
+                        if (check == 0)
+                        {
+                            //設定關節位置
+                            this.SetAbdomenPostion(new Vector3(m_bodyList.bodies[check].MidHip.x, m_bodyList.bodies[check].MidHip.y, m_bodyList.bodies[check].MidHip.z));
+                            this.SetChestPostion(new Vector3(m_bodyList.bodies[check].Neck.x, m_bodyList.bodies[check].Neck.y, m_bodyList.bodies[check].Neck.z));
+                            this.SetRightArmPostion(new Vector3(m_bodyList.bodies[check].RShoulder.x, m_bodyList.bodies[check].RShoulder.y, m_bodyList.bodies[check].RShoulder.z));
+                            this.SetRightForeArmPostion(new Vector3(m_bodyList.bodies[check].RElbow.x, m_bodyList.bodies[check].RElbow.y, m_bodyList.bodies[check].RElbow.z));
+                            this.SetRightHandPostion(new Vector3(m_bodyList.bodies[check].RWrist.x, m_bodyList.bodies[check].RWrist.y, m_bodyList.bodies[check].RWrist.z));
+                            this.SetLeftArmPostion(new Vector3(m_bodyList.bodies[check].LShoulder.x, m_bodyList.bodies[check].LShoulder.y, m_bodyList.bodies[check].LShoulder.z));
+                            this.SetLeftForeArmPostion(new Vector3(m_bodyList.bodies[check].LElbow.x, m_bodyList.bodies[check].LElbow.y, m_bodyList.bodies[check].LElbow.z));
+                            this.SetLeftHandPostion(new Vector3(m_bodyList.bodies[check].LWrist.x, m_bodyList.bodies[check].LWrist.y, m_bodyList.bodies[check].LWrist.z));
+                            this.SetRightUpLegPostion(new Vector3(m_bodyList.bodies[check].RHip.x, m_bodyList.bodies[check].RHip.y, m_bodyList.bodies[check].RHip.z));
+                            this.SetRightLegPostion(new Vector3(m_bodyList.bodies[check].RKnee.x, m_bodyList.bodies[check].RKnee.y, m_bodyList.bodies[check].RKnee.z));
+                            this.SetRightFootPostion(new Vector3(m_bodyList.bodies[check].RAnkle.x, m_bodyList.bodies[check].RAnkle.y, m_bodyList.bodies[check].RAnkle.z));
+                            this.SetLeftUpLegPostion(new Vector3(m_bodyList.bodies[check].LHip.x, m_bodyList.bodies[check].LHip.y, m_bodyList.bodies[check].LHip.z));
+                            this.SetLeftLegPostion(new Vector3(m_bodyList.bodies[check].LKnee.x, m_bodyList.bodies[check].LKnee.y, m_bodyList.bodies[check].LKnee.z));
+                            this.SetLeftFootPostion(new Vector3(m_bodyList.bodies[check].LAnkle.x, m_bodyList.bodies[check].LAnkle.y, m_bodyList.bodies[check].LAnkle.z));
+                        }
+                        else
+                        {
+                            if (m_bodyList.bodies[check - 1].MidHip.c != 0)
+                                this.SetAbdomenPostion(Vector3.Lerp(vector3abdomen, new Vector3(m_bodyList.bodies[check].MidHip.x, m_bodyList.bodies[check].MidHip.y, m_bodyList.bodies[check].MidHip.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].Neck.c != 0)
+                                this.SetChestPostion(Vector3.Lerp(vector3Chest, new Vector3(m_bodyList.bodies[check].Neck.x, m_bodyList.bodies[check].Neck.y, m_bodyList.bodies[check].Neck.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RShoulder.c != 0)
+                                this.SetRightArmPostion(Vector3.Lerp(vector3RightArm, new Vector3(m_bodyList.bodies[check].RShoulder.x, m_bodyList.bodies[check].RShoulder.y, m_bodyList.bodies[check].RShoulder.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RElbow.c != 0)
+                                this.SetRightForeArmPostion(Vector3.Lerp(vector3RightForeArm, new Vector3(m_bodyList.bodies[check].RElbow.x, m_bodyList.bodies[check].RElbow.y, m_bodyList.bodies[check].RElbow.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RWrist.c != 0)
+                                this.SetRightHandPostion(Vector3.Lerp(vector3RightHand, new Vector3(m_bodyList.bodies[check].RWrist.x, m_bodyList.bodies[check].RWrist.y, m_bodyList.bodies[check].RWrist.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LShoulder.c != 0)
+                                this.SetLeftArmPostion(Vector3.Lerp(vector3LeftArm, new Vector3(m_bodyList.bodies[check].LShoulder.x, m_bodyList.bodies[check].LShoulder.y, m_bodyList.bodies[check].LShoulder.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LElbow.c != 0)
+                                this.SetLeftForeArmPostion(Vector3.Lerp(vector3LeftForeArm, new Vector3(m_bodyList.bodies[check].LElbow.x, m_bodyList.bodies[check].LElbow.y, m_bodyList.bodies[check].LElbow.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LWrist.c != 0)
+                                this.SetLeftHandPostion(Vector3.Lerp(vector3LeftHand, new Vector3(m_bodyList.bodies[check].LWrist.x, m_bodyList.bodies[check].LWrist.y, m_bodyList.bodies[check].LWrist.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RHip.c != 0)
+                                this.SetRightUpLegPostion(Vector3.Lerp(vector3RightUpLeg, new Vector3(m_bodyList.bodies[check].RHip.x, m_bodyList.bodies[check].RHip.y, m_bodyList.bodies[check].RHip.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RKnee.c != 0)
+                                this.SetRightLegPostion(Vector3.Lerp(vector3RightLeg, new Vector3(m_bodyList.bodies[check].RKnee.x, m_bodyList.bodies[check].RKnee.y, m_bodyList.bodies[check].RKnee.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RAnkle.c != 0)
+                                this.SetRightFootPostion(Vector3.Lerp(vector3RightFoot, new Vector3(m_bodyList.bodies[check].RAnkle.x, m_bodyList.bodies[check].RAnkle.y, m_bodyList.bodies[check].RAnkle.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LHip.c != 0)
+                                this.SetLeftUpLegPostion(Vector3.Lerp(vector3LeftUpLeg, new Vector3(m_bodyList.bodies[check].LHip.x, m_bodyList.bodies[check].LHip.y, m_bodyList.bodies[check].LHip.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LKnee.c != 0)
+                                this.SetLeftLegPostion(Vector3.Lerp(vector3LeftLeg, new Vector3(m_bodyList.bodies[check].LKnee.x, m_bodyList.bodies[check].LKnee.y, m_bodyList.bodies[check].LKnee.z), 50f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LAnkle.c != 0)
+                                this.SetLeftFootPostion(Vector3.Lerp(vector3LeftFoot, new Vector3(m_bodyList.bodies[check].LAnkle.x, m_bodyList.bodies[check].LAnkle.y, m_bodyList.bodies[check].LAnkle.z), 50f * Time.deltaTime));
+
+                            /*
+                            if (m_bodyList.bodies[check - 1].MidHip.c != 0) 
+                                this.SetAbdomenPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check - 1].MidHip.x, m_bodyList.bodies[check - 1].MidHip.y, m_bodyList.bodies[check - 1].MidHip.z), new Vector3(m_bodyList.bodies[check].MidHip.x, m_bodyList.bodies[check].MidHip.y, m_bodyList.bodies[check].MidHip.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].Neck.c != 0)
+                                this.SetChestPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check - 1].Neck.x, m_bodyList.bodies[check - 1].Neck.y, m_bodyList.bodies[check - 1].Neck.z), new Vector3(m_bodyList.bodies[check].Neck.x, m_bodyList.bodies[check].Neck.y, m_bodyList.bodies[check].Neck.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RShoulder.c != 0)
+                                this.SetRightArmPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check - 1].RShoulder.x, m_bodyList.bodies[check - 1].RShoulder.y, m_bodyList.bodies[check - 1].RShoulder.z), new Vector3(m_bodyList.bodies[check].RShoulder.x, m_bodyList.bodies[check].RShoulder.y, m_bodyList.bodies[check].RShoulder.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RElbow.c != 0)
+                                this.SetRightForeArmPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check - 1].RElbow.x, m_bodyList.bodies[check - 1].RElbow.y, m_bodyList.bodies[check - 1].RElbow.z), new Vector3(m_bodyList.bodies[check].RElbow.x, m_bodyList.bodies[check].RElbow.y, m_bodyList.bodies[check].RElbow.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RWrist.c != 0)
+                                this.SetRightHandPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check - 1].RWrist.x, m_bodyList.bodies[check - 1].RWrist.y, m_bodyList.bodies[check - 1].RWrist.z), new Vector3(m_bodyList.bodies[check].RWrist.x, m_bodyList.bodies[check].RWrist.y, m_bodyList.bodies[check].RWrist.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LShoulder.c != 0)
+                                this.SetLeftArmPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].LShoulder.x, m_bodyList.bodies[check-1].LShoulder.y, m_bodyList.bodies[check-1].LShoulder.z), new Vector3(m_bodyList.bodies[check].LShoulder.x, m_bodyList.bodies[check].LShoulder.y, m_bodyList.bodies[check].LShoulder.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LElbow.c != 0)
+                                this.SetLeftForeArmPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].LElbow.x, m_bodyList.bodies[check-1].LElbow.y, m_bodyList.bodies[check-1].LElbow.z), new Vector3(m_bodyList.bodies[check].LElbow.x, m_bodyList.bodies[check].LElbow.y, m_bodyList.bodies[check].LElbow.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LWrist.c != 0)
+                                this.SetLeftHandPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].LWrist.x, m_bodyList.bodies[check-1].LWrist.y, m_bodyList.bodies[check-1].LWrist.z), new Vector3(m_bodyList.bodies[check].LWrist.x, m_bodyList.bodies[check].LWrist.y, m_bodyList.bodies[check].LWrist.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RHip.c != 0)
+                                this.SetRightUpLegPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].RHip.x, m_bodyList.bodies[check-1].RHip.y, m_bodyList.bodies[check-1].RHip.z), new Vector3(m_bodyList.bodies[check].RHip.x, m_bodyList.bodies[check].RHip.y, m_bodyList.bodies[check].RHip.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RKnee.c != 0)
+                                this.SetRightLegPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].RKnee.x, m_bodyList.bodies[check-1].RKnee.y, m_bodyList.bodies[check-1].RKnee.z), new Vector3(m_bodyList.bodies[check].RKnee.x, m_bodyList.bodies[check].RKnee.y, m_bodyList.bodies[check].RKnee.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].RAnkle.c != 0)
+                                this.SetRightFootPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].RAnkle.x, m_bodyList.bodies[check-1].RAnkle.y, m_bodyList.bodies[check-1].RAnkle.z), new Vector3(m_bodyList.bodies[check].RAnkle.x, m_bodyList.bodies[check].RAnkle.y, m_bodyList.bodies[check].RAnkle.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LHip.c != 0)
+                                this.SetLeftUpLegPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].LHip.x, m_bodyList.bodies[check-1].LHip.y, m_bodyList.bodies[check-1].LHip.z), new Vector3(m_bodyList.bodies[check].LHip.x, m_bodyList.bodies[check].LHip.y, m_bodyList.bodies[check].LHip.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LKnee.c != 0)
+                                this.SetLeftLegPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].LKnee.x, m_bodyList.bodies[check-1].LKnee.y, m_bodyList.bodies[check-1].LKnee.z), new Vector3(m_bodyList.bodies[check].LKnee.x, m_bodyList.bodies[check].LKnee.y, m_bodyList.bodies[check].LKnee.z), 10f * Time.deltaTime));
+                            if (m_bodyList.bodies[check - 1].LAnkle.c != 0)
+                                this.SetLeftFootPostion(Vector3.Lerp(new Vector3(m_bodyList.bodies[check-1].LAnkle.x, m_bodyList.bodies[check-1].LAnkle.y, m_bodyList.bodies[check-1].LAnkle.z), new Vector3(m_bodyList.bodies[check].LAnkle.x, m_bodyList.bodies[check].LAnkle.y, m_bodyList.bodies[check].LAnkle.z), 10f * Time.deltaTime));
+                            */
+                        }
+
+
+
+                       
+
+
+
+
+                    }
+
+
+                    check += 1;
+                    clock = 0;
+
+                    //CHECK每變換一次做一次計算
+                    //CompareData(FloatArray);
+                }
+
+
+                if (clock >= 0)
+                    clock += 1;
+            }
+            
+        }
+
+
 
 
 
@@ -421,12 +513,11 @@ public class User_posture : MonoBehaviour
             //transformAbdomen.up = AbdomenDirection;
             
             transformAbdomen.rotation = Quaternion.LookRotation(new Vector3(0, 0, 1), AbdomenDirection);
-
             //Debug.Log(Vector3.Cross(new Vector3(0, 0, 1),new Vector3(1, 0, 0)));
 
             //因為用向量計算無法得到CHEST TARGET 所以目前先用CHEST
             //transformChest.right = new Vector3(1, 0, 0);
-            
+
 
 
             Vector3 ChestDirection = vector3RightArm - vector3Chest;
@@ -795,11 +886,18 @@ public class User_posture : MonoBehaviour
     /////////////////////////輸入各個關節位置/////////////////////////////////////
 
     /*****************取出資料中的關節部位資訊*************************/
+    //CSV資料
     public void SetFloatArray(float[][] Array)
     {
         FloatArray = Array;
     }
 
+    //JSON資料
+    public void SetJsonBodyData(bodiesList bodyList)
+    {
+        m_bodyList = bodyList;
+    }
+    /*****************取出資料中的關節部位資訊*************************/
     /**********未來資料精準或換成智慧衣後就可不必使用此部分之函式 此部分用於資料校準 將位置相差較大的部分篩選並進行更改或刪除**********/
 
     /// <summary>
@@ -842,6 +940,35 @@ public class User_posture : MonoBehaviour
     }
 
 
+
+    private void CompareJsonData(float[][] array)
+    {
+
+        //若與前次位置相差過大 進行數據調整 使改變不一下過大
+        for (int i = 0; i < m_DataToBodyPart.Length; i++)
+        {
+            //0代表沒有資料 保持原樣
+            if (array[check][m_DataToBodyPart[i]] == 0)
+            {
+                array[check][m_DataToBodyPart[i]] = array[check - 2][m_DataToBodyPart[i]];
+            }
+            else if (array[check - 2][m_DataToBodyPart[i]] == 0)
+            {
+                //前一次為0 則數據直接等於此次
+            }
+            //若當前位置小於前次位置 將當前之資料增加一點
+            else if (array[check][m_DataToBodyPart[i]] - array[check - 2][m_DataToBodyPart[i]] < -5)
+            {
+                array[check][m_DataToBodyPart[i]] += 3;
+            }
+            //若當前位置大於前次位置 將當前之資料減少一點
+            else if (array[check][m_DataToBodyPart[i]] - array[check - 2][m_DataToBodyPart[i]] > 5)
+            {
+                array[check][m_DataToBodyPart[i]] -= 3;
+            }
+        }
+        
+    }
 
     /**********未來資料精準或換成智慧衣後就可不必使用此部分之函式 此部分用於資料校準 將位置相差較大的部分篩選並進行更改或刪除**********/
 

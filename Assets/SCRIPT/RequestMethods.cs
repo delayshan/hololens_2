@@ -98,7 +98,6 @@ public class RequestMethods : MonoBehaviour
             //建立浮點數二維陣列
             FloatArray = new float[lineArray.Length][];
 
-            //Debug.LogWarning(lineArray.Length);
             //把csv中的資料儲存在二位陣列中
             //Array[0]會是各部位的名稱
             //Array[][0]會是各部位的ID 因此都不使用
