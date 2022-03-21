@@ -54,7 +54,35 @@ public class Json_Reader : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        //hololens沒按鍵 進去直接撥
+        string FileContent = null;
+        TextAsset binAsset = new TextAsset();
+
+        //用FileStream讀取csv二進位制檔案
+        if (File.Exists(Application.persistentDataPath + "/mjson.json"))
+        {
+            /*
+            using (FileStream fs = new FileStream(Application.persistentDataPath + "/data.csv", FileMode.Open))
+            {
+
+            }
+            */
+            FileContent = File.ReadAllText(Application.persistentDataPath + "/mjson.json");
+            binAsset = new TextAsset(FileContent);
+
+            m_BodyData = JsonUtility.FromJson<bodiesList>(binAsset.text);
+            Debug.LogWarning(binAsset);
+            Debug.LogWarning(m_BodyData.bodies[0].Nose.x);
+        }
+        else
+        {
+            Debug.LogWarning(Application.persistentDataPath + "/mjson.json can't be read");
+        }
+
+
+        m_UserPosture.SetJsonBodyData(m_BodyData);
+        m_CoachPosture.SetJsonBodyData(m_BodyData);
+
     }
 
     // Update is called once per frame

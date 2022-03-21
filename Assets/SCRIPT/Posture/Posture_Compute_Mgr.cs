@@ -67,6 +67,12 @@ public class Posture_Compute_Mgr : MonoBehaviour
         {
             gameobjectCoachBodyParts[i].GetComponent<Renderer>().material = materialTransParentBlue;
         }
+
+        //HOLOLENS暫時設定
+        for (int i = 0; i < gameobjectCoachBodyParts.Length; i++)
+        {
+            gameobjectCoachBodyParts[i].SetActive(false);
+        }
     }
 
 
